@@ -1,4 +1,4 @@
-package com.example.soba2clean.dto;
+package com.example.soba2clean.dto.authentication;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Email;

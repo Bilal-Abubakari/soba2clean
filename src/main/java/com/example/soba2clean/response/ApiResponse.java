@@ -1,4 +1,4 @@
-package com.example.soba2clean.model;
+package com.example.soba2clean.response;
 
 public class ApiResponse<T> {
     private String message;
