@@ -19,10 +19,10 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/auth/**").permitAll() // Allow public access to auth endpoints
+                        .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/public/**").permitAll()
                         .requestMatchers("/error/**").permitAll()
-                        .anyRequest().authenticated()               // All other requests require authentication
+                        .anyRequest().authenticated()
                 );
         return http.build();
     }
