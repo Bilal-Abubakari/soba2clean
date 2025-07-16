@@ -24,33 +24,43 @@ public class AuthenticationService {
     }
 
     public ApiResponse<User> register(RegisterDto registerDto) {
-        User user = new User();
-        Boolean userExists = this.userRepository.existsByEmail(registerDto.getEmail());
+       try {
+           User user = new User();
+           Boolean userExists = this.userRepository.existsByEmail(registerDto.getEmail());
 
-        if (!registerDto.getPassword().equals(registerDto.getConfirmPassword())) {
-            throw new BadRequestException("Passwords do not match");
-        }
-        if (userExists) {
-           throw new UserAlreadyExistsException("User with this email already exists");
-        }
-        user.setUser(registerDto);
-        user.setPassword(this.passwordEncoder.encode(registerDto.getPassword()));
-        User savedUser = this.userRepository.save(user);
-        return new ApiResponse<>("User registered successfully", savedUser);
+           if (!registerDto.getPassword().equals(registerDto.getConfirmPassword())) {
+               throw new BadRequestException("Passwords do not match");
+           }
+           if (userExists) {
+               throw new UserAlreadyExistsException("User with this email already exists");
+           }
+           user.setUser(registerDto);
+           user.setPassword(this.passwordEncoder.encode(registerDto.getPassword()));
+           User savedUser = this.userRepository.save(user);
+           return new ApiResponse<>("User registered successfully", savedUser);
+       } catch (Exception ex) {
+           throw new RuntimeException("Something went wrong creating new user: " + ex.getMessage(), ex);
+       }
     }
 
     public ApiResponse<LoginResponse> login(String email, String password) {
-        User user = this.userRepository.findByEmail(email)
-                .orElseThrow(() -> new UnauthorizedException("Invalid email or password"));
-        System.out.println("User found? " + user);
+       try {
+           User user = this.userRepository.findByEmail(email)
+                   .orElseThrow(() -> new UnauthorizedException("Invalid email or password"));
 
-        if (!this.passwordEncoder.matches(password, user.getPassword())) {
-            throw new UnauthorizedException("Invalid email or password");
-        }
+           if (!this.passwordEncoder.matches(password, user.getPassword())) {
+               throw new UnauthorizedException("Invalid email or password");
+           }
 
-        LoginResponse loginResponse = new LoginResponse(jwtService.generateAccessToken(user),
-                jwtService.generateRefreshToken(user) );
+           String accessToken = jwtService.generateAccessToken(user);
+           String refreshToken = jwtService.generateRefreshToken(user);
 
-        return new ApiResponse<>("Login successful", loginResponse);
+           LoginResponse loginResponse = new LoginResponse(accessToken,
+                   refreshToken, user );
+
+           return new ApiResponse<>("Login successful", loginResponse);
+       } catch (Exception ex) {
+           throw new RuntimeException("Something went wrong when authenticating user: " + ex.getMessage(), ex);
+       }
     }
 }
