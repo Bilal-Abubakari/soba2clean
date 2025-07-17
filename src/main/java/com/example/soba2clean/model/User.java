@@ -8,10 +8,10 @@ import java.time.Instant;
 
 @Entity
 @Table(name = "sobaUser")
-public class User  extends AuditableEntity {
+public class User extends AuditableEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String  id;
 
     private String firstName;
 
@@ -28,7 +28,7 @@ public class User  extends AuditableEntity {
 
     private Instant verifiedAt;
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
@@ -57,7 +57,7 @@ public class User  extends AuditableEntity {
     }
 
     public Instant getVerifiedAt() {
-        return  verifiedAt;
+        return verifiedAt;
     }
 
 
@@ -73,7 +73,10 @@ public class User  extends AuditableEntity {
         this.password = password;
     }
 
-    public void setVerifiedAt() {
+    public void markAsVerified() {
         verifiedAt = Instant.now();
+    }
+    public void setVerifiedAt(Instant timestamp) {
+        verifiedAt = timestamp;
     }
 }
