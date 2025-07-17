@@ -4,12 +4,14 @@ import com.example.soba2clean.dto.authentication.RegisterDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
+import java.time.Instant;
+
 @Entity
 @Table(name = "sobaUser")
-public class User {
+public class User extends AuditableEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String  id;
 
     private String firstName;
 
@@ -24,7 +26,9 @@ public class User {
 
     private String address;
 
-    public Long getId() {
+    private Instant verifiedAt;
+
+    public String getId() {
         return id;
     }
 
@@ -52,6 +56,11 @@ public class User {
         return password;
     }
 
+    public Instant getVerifiedAt() {
+        return verifiedAt;
+    }
+
+
     public void setUser(RegisterDto registerDto) {
         firstName = registerDto.getFirstName();
         lastName = registerDto.getLastName();
@@ -64,4 +73,10 @@ public class User {
         this.password = password;
     }
 
+    public void markAsVerified() {
+        verifiedAt = Instant.now();
+    }
+    public void setVerifiedAt(Instant timestamp) {
+        verifiedAt = timestamp;
+    }
 }
