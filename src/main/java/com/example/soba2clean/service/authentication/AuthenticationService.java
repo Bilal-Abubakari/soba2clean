@@ -4,6 +4,7 @@ import com.example.soba2clean.dto.authentication.RegisterDto;
 import com.example.soba2clean.exception.BadRequestException;
 import com.example.soba2clean.exception.authentication.UnauthorizedException;
 import com.example.soba2clean.exception.authentication.UserAlreadyExistsException;
+import com.example.soba2clean.repository.VerificationRepository;
 import com.example.soba2clean.response.ApiResponse;
 import com.example.soba2clean.model.User;
 import com.example.soba2clean.repository.UserRepository;
@@ -13,14 +14,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
 public class AuthenticationService {
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final VerificationService verificationService;
 
-    public AuthenticationService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public AuthenticationService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService, VerificationService verificationService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.verificationService = verificationService;
     }
 
     public ApiResponse<User> register(RegisterDto registerDto) {
@@ -37,6 +41,7 @@ public class AuthenticationService {
            user.setUser(registerDto);
            user.setPassword(this.passwordEncoder.encode(registerDto.getPassword()));
            User savedUser = this.userRepository.save(user);
+           this.verificationService.sendVerificationEmail(savedUser);
            return new ApiResponse<>("User registered successfully", savedUser);
        } catch (Exception ex) {
            throw new RuntimeException("Something went wrong creating new user: " + ex.getMessage(), ex);
