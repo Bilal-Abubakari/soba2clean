@@ -12,9 +12,11 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.logging.Logger;
 
 @Service
 public class EmailService {
+    Logger logger = Logger.getLogger(EmailService.class.getName());
     private final JavaMailSender javaMailSender;
     private final SpringTemplateEngine emailTemplateEngine;
 
@@ -34,9 +36,9 @@ public class EmailService {
 
         try {
             javaMailSender.send(message);
-            System.out.println("HTML email sent successfully to: " + to);
+            logger.info("HTML email sent successfully to: " + to);
         } catch (MailException e) {
-            System.err.println("Error sending HTML email to " + to + ": " + e.getMessage());
+            logger.info("Error sending HTML email to " + to + ": " + e.getMessage());
             throw new MessagingException("Failed to send HTML email", e);
         }
     }
