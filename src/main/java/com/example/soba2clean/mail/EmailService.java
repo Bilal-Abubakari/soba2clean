@@ -38,7 +38,7 @@ public class EmailService {
             javaMailSender.send(message);
             logger.info("HTML email sent successfully to: " + to);
         } catch (MailException e) {
-            logger.info("Error sending HTML email to " + to + ": " + e.getMessage());
+            logger.severe("Error sending HTML email to " + to + ": " + e.getMessage());
             throw new MessagingException("Failed to send HTML email", e);
         }
     }
