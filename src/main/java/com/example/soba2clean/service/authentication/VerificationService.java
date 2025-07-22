@@ -59,7 +59,7 @@ public class VerificationService {
     public void sendVerificationEmail(User user) throws MessagingException {
         RateLimiter userLimiter = userEmailRateLimiters.computeIfAbsent(
                 user.getEmail(),
-                k -> RateLimiter.create(AppConstants.PERMITS_PER_MINUTE / 60.0) // Convert to permits per second
+                k -> RateLimiter.create(AppConstants.PERMITS_PER_MINUTUES_IN_SECONDS) // Convert to permits per second
         );
 
         if (!userLimiter.tryAcquire()) {
