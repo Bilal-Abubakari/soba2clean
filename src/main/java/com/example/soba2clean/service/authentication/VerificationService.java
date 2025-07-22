@@ -44,6 +44,8 @@ public class VerificationService {
 
             userRepository.save(user);
 
+            verificationRepository.delete(verification);
+
             return new ApiResponse<>("Email verified successfully", user);
         } catch (Exception ex) {
             throw new RuntimeException("Something went wrong during email verification: " + ex.getMessage(), ex);
@@ -57,6 +59,6 @@ public class VerificationService {
         Map<String, Object> emailVariables = Map.of(
                 "firstName", user.getFirstName(),
                 "verificationLink", baseUrl + "/verification/email/" + verification.getToken());
-        emailService.sendHtmlEmail(user.getEmail(), "Next Welcome to Soba2Clean", EmailTemplateName.EMAIL_VERIFICATION, emailVariables);
+        emailService.sendHtmlEmail(user.getEmail(), "Next Step: Email Verification", EmailTemplateName.EMAIL_VERIFICATION, emailVariables);
     }
 }
