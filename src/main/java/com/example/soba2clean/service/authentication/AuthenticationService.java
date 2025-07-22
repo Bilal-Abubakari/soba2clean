@@ -4,7 +4,6 @@ import com.example.soba2clean.dto.authentication.RegisterDto;
 import com.example.soba2clean.exception.BadRequestException;
 import com.example.soba2clean.exception.authentication.UnauthorizedException;
 import com.example.soba2clean.exception.authentication.UserAlreadyExistsException;
-import com.example.soba2clean.repository.VerificationRepository;
 import com.example.soba2clean.response.ApiResponse;
 import com.example.soba2clean.model.User;
 import com.example.soba2clean.repository.UserRepository;
@@ -52,6 +51,11 @@ public class AuthenticationService {
        try {
            User user = this.userRepository.findByEmail(email)
                    .orElseThrow(() -> new UnauthorizedException("Invalid email or password"));
+
+           if (user.getVerifiedAt() == null) {
+                this.verificationService.sendVerificationEmail(user);
+                throw new UnauthorizedException("Email not verified, please check your email for verification link");
+           }
 
            if (!this.passwordEncoder.matches(password, user.getPassword())) {
                throw new UnauthorizedException("Invalid email or password");
