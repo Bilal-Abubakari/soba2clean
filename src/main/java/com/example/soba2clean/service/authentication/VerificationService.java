@@ -2,6 +2,7 @@ package com.example.soba2clean.service.authentication;
 
 import com.example.soba2clean.constants.AppConstants;
 import com.example.soba2clean.enums.EmailTemplateName;
+import com.example.soba2clean.exception.TooManyRequestsException;
 import com.example.soba2clean.exception.authentication.UnauthorizedException;
 import com.example.soba2clean.mail.EmailService;
 import com.example.soba2clean.model.User;
@@ -9,6 +10,7 @@ import com.example.soba2clean.model.Verification;
 import com.example.soba2clean.repository.UserRepository;
 import com.example.soba2clean.repository.VerificationRepository;
 import com.example.soba2clean.response.ApiResponse;
+import com.google.common.util.concurrent.RateLimiter;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,9 +18,11 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class VerificationService {
+    private final ConcurrentHashMap<String, RateLimiter> userEmailRateLimiters = new ConcurrentHashMap<>();
     private final UserRepository userRepository;
     private final VerificationRepository verificationRepository;
     private final EmailService emailService;
@@ -53,6 +57,14 @@ public class VerificationService {
     }
 
     public void sendVerificationEmail(User user) throws MessagingException {
+        RateLimiter userLimiter = userEmailRateLimiters.computeIfAbsent(
+                user.getEmail(),
+                k -> RateLimiter.create(AppConstants.PERMITS_PER_MINUTE / 60.0) // Convert to permits per second
+        );
+
+        if (!userLimiter.tryAcquire()) {
+            throw new TooManyRequestsException("Too many verification email requests. Please wait and try again.");
+        }
         Verification verification = new Verification();
         verification.setEmailVerification(user);
         verificationRepository.save(verification);
