@@ -2,6 +2,7 @@ package com.example.soba2clean.service.authentication;
 
 import com.example.soba2clean.constants.AppConstants;
 import com.example.soba2clean.enums.EmailTemplateName;
+import com.example.soba2clean.enums.VerificationType;
 import com.example.soba2clean.exception.TooManyRequestsException;
 import com.example.soba2clean.exception.authentication.UnauthorizedException;
 import com.example.soba2clean.mail.EmailService;
@@ -37,12 +38,8 @@ public class VerificationService {
 
     public ApiResponse<User> verifyEmail(String token) {
         try {
-            Verification verification = verificationRepository.findByToken(token)
-                    .orElseThrow(() -> new UnauthorizedException("Invalid token, please login again to receive a new verification email"));
-            Duration timeElapsed = Duration.between(verification.getCreatedAt(), Instant.now());
-            if (timeElapsed.toMinutes() > AppConstants.EMAIL_VERIFICATION_EXPIRY_TIME_IN_MINUTES) {
-                throw new UnauthorizedException("Token has expired, please login again to receive a new verification email");
-            }
+            Verification verification = getVerificationFromToken(token, "Invalid token, please login again to receive a new verification email",
+                    AppConstants.EMAIL_VERIFICATION_EXPIRY_TIME_IN_MINUTES, "Token has expired, please login again to receive a new verification email");
             User user = verification.getUser();
             user.markAsVerified();
 
@@ -57,20 +54,43 @@ public class VerificationService {
     }
 
     public void sendVerificationEmail(User user) throws MessagingException {
-        RateLimiter userLimiter = userEmailRateLimiters.computeIfAbsent(
-                user.getEmail(),
-                k -> RateLimiter.create(AppConstants.PERMITS_PER_MINUTUES_IN_SECONDS) // Convert to permits per second
-        );
-
-        if (!userLimiter.tryAcquire()) {
-            throw new TooManyRequestsException("Too many verification email requests. Please wait and try again.");
-        }
+        verificationRateLimiter(user.getEmail());
         Verification verification = new Verification();
-        verification.setEmailVerification(user);
+        verification.setVerification(user, VerificationType.EMAIL_VERIFICATION);
         verificationRepository.save(verification);
         Map<String, Object> emailVariables = Map.of(
                 "firstName", user.getFirstName(),
                 "verificationLink", baseUrl + "/verification/email/" + verification.getToken());
         emailService.sendHtmlEmail(user.getEmail(), "Next Step: Email Verification", EmailTemplateName.EMAIL_VERIFICATION, emailVariables);
     }
+
+    public void sendForgotPasswordEmail(User user) throws MessagingException {
+        verificationRateLimiter(user.getEmail());
+        Verification verification = new Verification();
+        verification.setVerification(user, VerificationType.PASSWORD_RESET);
+        verificationRepository.save(verification);
+        Map<String, Object> emailVariables = Map.of(
+                "firstName", user.getFirstName(),
+                "resetPasswordLink", baseUrl + "/verification/forgot-password/" + verification.getToken());
+        emailService.sendHtmlEmail(user.getEmail(), "Reset Your Password", EmailTemplateName.FORGOT_PASSWORD, emailVariables);
+    }
+
+    public Verification getVerificationFromToken(String token, String errorMessage, int expiryDurationInMinutes, String expiryErrorMessage) {
+        Verification verification = verificationRepository.findByToken(token)
+                .orElseThrow(() -> new UnauthorizedException(errorMessage));
+        Duration timeElapsed = Duration.between(verification.getCreatedAt(), Instant.now());
+        if (timeElapsed.toMinutes() > expiryDurationInMinutes) {
+            throw new UnauthorizedException(expiryErrorMessage);
+        }
+        return verification;
+    }
+
+
+    private void verificationRateLimiter(String email) {
+        RateLimiter userLimiter = userEmailRateLimiters.computeIfAbsent(email, k -> RateLimiter.create(AppConstants.PERMITS_PER_MINUTUES_IN_SECONDS));
+        if (!userLimiter.tryAcquire()) {
+            throw new TooManyRequestsException("Too many verification email requests. Please wait and try again.");
+        }
+    }
+
 }
