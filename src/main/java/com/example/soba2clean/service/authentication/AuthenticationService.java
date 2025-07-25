@@ -89,7 +89,6 @@ public class AuthenticationService {
     }
 
     public ApiResponse<User> resetPassword(String token, String newPassword, String confirmNewPassword) {
-        checkIfPasswordsMatch(newPassword, confirmNewPassword);
         try {
             checkIfPasswordsMatch(newPassword, confirmNewPassword);
             String errorMessage = "Invalid token, or token has expired, please try to reset your password again";
