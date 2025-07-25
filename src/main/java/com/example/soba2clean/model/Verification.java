@@ -28,8 +28,8 @@ public class Verification extends AuditableEntity {
         return user;
     }
 
-    public void setEmailVerification(User user) {
-        this.type = VerificationType.EMAIL_VERIFICATION;
+    public void setVerification(User user, VerificationType type) {
+        this.type = type;
         this.token = UUID.randomUUID().toString();
         this.user = user;
     }
