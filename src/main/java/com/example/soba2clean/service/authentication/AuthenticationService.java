@@ -6,27 +6,28 @@ import com.example.soba2clean.exception.BadRequestException;
 import com.example.soba2clean.exception.NotFoundException;
 import com.example.soba2clean.exception.authentication.UnauthorizedException;
 import com.example.soba2clean.exception.authentication.UserAlreadyExistsException;
+import com.example.soba2clean.model.PasswordHistory;
 import com.example.soba2clean.model.User;
+import com.example.soba2clean.model.Verification;
 import com.example.soba2clean.repository.UserRepository;
 import com.example.soba2clean.response.ApiResponse;
 import com.example.soba2clean.response.authentication.LoginResponse;
 import jakarta.mail.MessagingException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AuthenticationService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final VerificationService verificationService;
+    private final PasswordHistoryService passwordHistoryService;
 
-    public AuthenticationService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService, VerificationService verificationService) {
+    public AuthenticationService(UserRepository userRepository, JwtService jwtService, VerificationService verificationService, PasswordHistoryService passwordHistoryService) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.verificationService = verificationService;
+        this.passwordHistoryService = passwordHistoryService;
     }
 
     public ApiResponse<User> register(RegisterDto registerDto) {
@@ -40,7 +41,9 @@ public class AuthenticationService {
                 throw new UserAlreadyExistsException("User with this email already exists");
             }
             user.setUser(registerDto);
-            user.setPassword(this.passwordEncoder.encode(registerDto.getPassword()));
+            PasswordHistory passwordHistory = this.passwordHistoryService.createPasswordHistory(registerDto.getPassword(), user);
+            user.setPassword(passwordHistory.getHistoricalPasswordHash());
+            user.addPasswordHistory(passwordHistory);
             User savedUser = this.userRepository.save(user);
             this.verificationService.sendVerificationEmail(savedUser);
             return new ApiResponse<>("User registered successfully", savedUser);
@@ -56,7 +59,7 @@ public class AuthenticationService {
 
             checkIfEmailIsVerified(user);
 
-            if (!this.passwordEncoder.matches(password, user.getPassword())) {
+            if (!this.passwordHistoryService.checkIfPasswordIsCorrect(password, user.getPassword())) {
                 throw new UnauthorizedException("Invalid email or password");
             }
 
@@ -92,12 +95,17 @@ public class AuthenticationService {
         try {
             checkIfPasswordsMatch(newPassword, confirmNewPassword);
             String errorMessage = "Invalid token, or token has expired, please try to reset your password again";
-            User user = this.verificationService.getVerificationFromToken(token,
+
+            Verification verification = this.verificationService.getVerificationFromToken(token,
                     errorMessage,
                     AppConstants.RESET_PASSWORD_EXPIRY_TIME_IN_MINUTES,
-                    errorMessage).getUser();
-            user.setPassword(this.passwordEncoder.encode(newPassword));
+                    errorMessage);
+            User user = verification.getUser();
+            PasswordHistory processedPasswordHistory = this.passwordHistoryService.processPassword(newPassword, user);
+            user.setPassword(processedPasswordHistory.getHistoricalPasswordHash());
+            user.addPasswordHistory(processedPasswordHistory);
             User updatedUser = this.userRepository.save(user);
+            this.verificationService.deleteVerification(verification);
             return new ApiResponse<>("Password reset successfully", updatedUser);
         } catch (Exception ex) {
             throw new RuntimeException("Something went wrong when resetting password: " + ex.getMessage(), ex);

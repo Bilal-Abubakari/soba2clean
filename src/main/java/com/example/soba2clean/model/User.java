@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "sobaUser")
@@ -24,6 +26,8 @@ public class User extends AuditableEntity {
 
     private Instant verifiedAt;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PasswordHistory> passwordHistory = new ArrayList<>();
 
     public String getFirstName() {
         return firstName;
@@ -53,6 +57,10 @@ public class User extends AuditableEntity {
         return verifiedAt;
     }
 
+    public List<PasswordHistory> getPasswordHistory() {
+        return passwordHistory;
+    }
+
     public void setUser(RegisterDto registerDto) {
         firstName = registerDto.getFirstName();
         lastName = registerDto.getLastName();
@@ -67,5 +75,10 @@ public class User extends AuditableEntity {
 
     public void markAsVerified() {
         verifiedAt = Instant.now();
+    }
+
+    public void addPasswordHistory(PasswordHistory passwordHistory) {
+        this.passwordHistory.add(passwordHistory);
+        passwordHistory.setUser(this);
     }
 }

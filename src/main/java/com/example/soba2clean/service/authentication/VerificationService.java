@@ -85,6 +85,10 @@ public class VerificationService {
         return verification;
     }
 
+    public void deleteVerification(Verification verification) {
+        this.verificationRepository.delete(verification);
+    }
+
 
     private void verificationRateLimiter(String email) {
         RateLimiter userLimiter = userEmailRateLimiters.computeIfAbsent(email, k -> RateLimiter.create(AppConstants.PERMITS_PER_MINUTUES_IN_SECONDS));
