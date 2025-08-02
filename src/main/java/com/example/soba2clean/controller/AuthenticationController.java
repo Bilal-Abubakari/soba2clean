@@ -4,6 +4,7 @@ import com.example.soba2clean.dto.authentication.ForgotPasswordDto;
 import com.example.soba2clean.dto.authentication.LoginDto;
 import com.example.soba2clean.dto.authentication.RegisterDto;
 import com.example.soba2clean.dto.authentication.ResetPasswordDto;
+import com.example.soba2clean.enums.Role;
 import com.example.soba2clean.model.User;
 import com.example.soba2clean.response.ApiResponse;
 import com.example.soba2clean.response.authentication.LoginResponse;
@@ -24,9 +25,19 @@ public class AuthenticationController {
         this.authenticationService = authenticationService;
     }
 
-    @PostMapping("/register")
-    public ApiResponse<User> register(@Valid @RequestBody RegisterDto registerDto) {
-        return this.authenticationService.register(registerDto);
+    @PostMapping("/register-customer")
+    public ApiResponse<User> registerCustomer(@Valid @RequestBody RegisterDto registerDto) {
+        return this.authenticationService.register(registerDto, Role.CUSTOMER);
+    }
+
+    @PostMapping("/register-cleaner")
+    public ApiResponse<User> registerCleaner(@Valid @RequestBody RegisterDto registerDto) {
+        return this.authenticationService.register(registerDto, Role.CLEANER);
+    }
+
+    @PostMapping("/invite-admin")
+    public ApiResponse<User> inviteAdmin(@Valid @RequestBody RegisterDto registerDto) {
+        return this.authenticationService.register(registerDto, Role.ADMIN, true);
     }
 
     @PostMapping("/login")

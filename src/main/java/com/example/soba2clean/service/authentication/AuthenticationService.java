@@ -2,6 +2,7 @@ package com.example.soba2clean.service.authentication;
 
 import com.example.soba2clean.constants.AppConstants;
 import com.example.soba2clean.dto.authentication.RegisterDto;
+import com.example.soba2clean.enums.Role;
 import com.example.soba2clean.exception.BadRequestException;
 import com.example.soba2clean.exception.NotFoundException;
 import com.example.soba2clean.exception.authentication.UnauthorizedException;
@@ -22,34 +23,45 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final VerificationService verificationService;
     private final PasswordHistoryService passwordHistoryService;
+    private final UserService userService;
 
-    public AuthenticationService(UserRepository userRepository, JwtService jwtService, VerificationService verificationService, PasswordHistoryService passwordHistoryService) {
+    public AuthenticationService(UserRepository userRepository, JwtService jwtService, VerificationService verificationService, PasswordHistoryService passwordHistoryService, UserService userService) {
         this.userRepository = userRepository;
         this.jwtService = jwtService;
         this.verificationService = verificationService;
         this.passwordHistoryService = passwordHistoryService;
+        this.userService = userService;
     }
 
-    public ApiResponse<User> register(RegisterDto registerDto) {
+    public ApiResponse<User> register(RegisterDto registerDto, Role role, boolean mustChangePassword) {
         try {
             User user = new User();
-            Boolean userExists = this.userRepository.existsByEmail(registerDto.getEmail());
 
-            checkIfPasswordsMatch(registerDto.getPassword(), registerDto.getConfirmPassword());
+            boolean userExists = this.userService.userExistsByEmail(registerDto.getEmail());
 
             if (userExists) {
                 throw new UserAlreadyExistsException("User with this email already exists");
             }
-            user.setUser(registerDto);
+
+            checkIfPasswordsMatch(registerDto.getPassword(), registerDto.getConfirmPassword());
+            user.setUser(registerDto, role);
             PasswordHistory passwordHistory = this.passwordHistoryService.createPasswordHistory(registerDto.getPassword(), user);
             user.setPassword(passwordHistory.getHistoricalPasswordHash());
             user.addPasswordHistory(passwordHistory);
+            user.setMustChangePassword(mustChangePassword);
+            if (role.equals(Role.ADMIN))
+                user.markAsVerified();
             User savedUser = this.userRepository.save(user);
-            this.verificationService.sendVerificationEmail(savedUser);
+            if (!role.equals(Role.ADMIN))
+                this.verificationService.sendVerificationEmail(savedUser);
             return new ApiResponse<>("User registered successfully", savedUser);
         } catch (Exception ex) {
             throw new RuntimeException("Something went wrong creating new user: " + ex.getMessage(), ex);
         }
+    }
+
+    public ApiResponse<User> register(RegisterDto registerDto, Role role) {
+        return this.register(registerDto, role, false);
     }
 
     public ApiResponse<LoginResponse> login(String email, String password) {
