@@ -1,6 +1,9 @@
 package com.example.soba2clean.filter;
 
+import com.example.soba2clean.exception.authentication.UnauthorizedException;
+import com.example.soba2clean.model.User;
 import com.example.soba2clean.service.authentication.JwtService;
+import com.example.soba2clean.service.authentication.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -23,11 +26,7 @@ import java.util.Map;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
-
-    JwtAuthenticationFilter(JwtService jwtService) {
-        this.jwtService = jwtService;
-    }
-
+    private final UserService userService;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
     private final List<String> excludedPaths = List.of(
             "/auth/**",
@@ -36,11 +35,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/error/**"
     );
 
+    JwtAuthenticationFilter(JwtService jwtService, UserService userService) {
+        this.jwtService = jwtService;
+        this.userService = userService;
+    }
+
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
         return excludedPaths.stream().anyMatch(pattern -> pathMatcher.match(pattern, path));
     }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -52,7 +57,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             objectMapper.writeValue(response.getWriter(),
-               Map.of("error", "Missing or invalid Authorization header"));
+                    Map.of("error", "Missing or invalid Authorization header"));
             return;
         }
 
@@ -65,20 +70,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType("application/json");
                 objectMapper.writeValue(response.getWriter(),
-                    Map.of("error", "Invalid or expired token"));
+                        Map.of("error", "Invalid or expired token"));
                 return;
             }
-            // Set authentication in SecurityContext
+            User user = userService.findUserByEmail(email)
+                    .orElseThrow(() -> new UnauthorizedException("User not found"));
             UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(email, null, List.of());
+                    new UsernamePasswordAuthenticationToken(email, null, user.getAuthorities());
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        } catch (ExpiredJwtException | MalformedJwtException | SignatureException e) {
+        } catch (ExpiredJwtException | MalformedJwtException |
+                 SignatureException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             objectMapper.writeValue(response.getWriter(),
-                Map.of("error", "Invalid or expired token"));
+                    Map.of("error", "Invalid or expired token"));
             return;
         }
 

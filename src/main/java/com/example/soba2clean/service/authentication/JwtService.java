@@ -33,8 +33,8 @@ public class JwtService {
     public String generateAccessToken(User user) {
         return generateToken(user.getEmail(), accessExpiration, Map.of(
                 "userId", user.getId(),
-                "email", user.getEmail()
-        ));
+                "email", user.getEmail(),
+                "role", "ROLE_" +user.getRole().getRole()));
     }
 
     public String generateRefreshToken(User user) {
