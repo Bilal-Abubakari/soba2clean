@@ -1,5 +1,8 @@
 package com.example.soba2clean.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum EmailTemplateName {
     EMAIL_VERIFICATION("email_verification"),
     FORGOT_PASSWORD("forgot_password");
@@ -10,7 +13,4 @@ public enum EmailTemplateName {
         this.templateFileName = templateFileName;
     }
 
-    public String getTemplateFileName() {
-        return templateFileName;
-    }
 }
