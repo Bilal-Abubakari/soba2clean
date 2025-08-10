@@ -68,9 +68,9 @@ public class CleanerService {
         return new ApiResponse<>("Cleaner approved successfully", cleaner);
     }
 
-    public ApiResponse<Cleaner> rejectCleaner(String id, String reasonForRejection) {
+    public ApiResponse<Cleaner> declineCleaner(String id, String reasonForRejection) {
         Cleaner cleaner = setCleanerStatus(id, Status.SUSPENDED);
-        sendRejectionNotification(cleaner, reasonForRejection);
+        sendDeclinationNotification(cleaner, reasonForRejection);
         return new ApiResponse<>("Cleaner rejected successfully", cleaner);
     }
 
@@ -82,7 +82,7 @@ public class CleanerService {
         return this.cleanerRepository.save(cleaner);
     }
 
-    private void sendRejectionNotification(Cleaner cleaner, String reason) {
+    private void sendDeclinationNotification(Cleaner cleaner, String reason) {
         Map<String, Object> variables = new HashMap<>();
         variables.put("cleanerName", cleaner.getUser().getFirstName());
         variables.put("reason", reason);

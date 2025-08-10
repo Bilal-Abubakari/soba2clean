@@ -39,6 +39,6 @@ public class CleanerController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping("/{id}/decline")
     public ApiResponse<Cleaner> declineCleaner(@PathVariable String id, @RequestBody DeclineCleanerDto declineCleanerDto) {
-        return this.cleanerService.rejectCleaner(id, declineCleanerDto.getReason());
+        return this.cleanerService.declineCleaner(id, declineCleanerDto.getReason());
     }
 }
