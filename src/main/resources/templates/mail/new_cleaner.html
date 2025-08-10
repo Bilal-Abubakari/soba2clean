@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>New Cleaner Awaiting Review</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .email-container {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            max-width: 48rem;
+            width: 100%;
+            margin: 1rem;
+        }
+        .header-section {
+            background: linear-gradient(to right, #2563eb, #4f46e5);
+            padding: 1.5rem;
+            text-align: center;
+            color: #ffffff;
+        }
+        .header-title {
+            font-size: 2.25rem;
+            line-height: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .header-subtitle {
+            font-size: 1.125rem;
+            line-height: 1.75rem;
+            opacity: 0.9;
+        }
+        .content-section {
+            padding: 1.5rem;
+        }
+        .content-paragraph {
+            color: #374151;
+            font-size: 1rem;
+            line-height: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .meta {
+            color: #4b5563;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+        .call-to-action {
+            text-align: center;
+            margin: 2rem 0;
+        }
+        .call-to-action-button {
+            display: inline-block;
+            background-color: #22c55e;
+            color: #ffffff;
+            font-weight: 700;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            text-decoration: none;
+            transition: all 0.3s ease-in-out;
+        }
+        .call-to-action-button:hover {
+            background-color: #16a34a;
+            transform: scale(1.05);
+        }
+        .footer-section {
+            background-color: #e5e7eb;
+            padding: 1.5rem;
+            text-align: center;
+            color: #4b5563;
+            font-size: 0.875rem;
+        }
+        .footer-paragraph {
+            margin-bottom: 0.5rem;
+        }
+        .footer-link {
+            color: #2563eb;
+            text-decoration: underline;
+            word-break: break-all;
+        }
+        @media (min-width: 640px) {
+            .email-container { margin: 1.5rem; }
+            .header-section { padding: 2rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <div class="header-section">
+        <div class="header-title">New Cleaner Submitted</div>
+        <div class="header-subtitle">Action required: review and approve</div>
+    </div>
+
+    <div class="content-section">
+        <p class="content-paragraph" th:text="'Hello ' + ${adminName} + ','">Hello Admin,</p>
+
+        <p class="content-paragraph">
+            A new cleaner has been added and is awaiting your review. Please sign in to the dashboard to approve or reject this submission.
+        </p>
+
+        <p class="meta">
+            <strong th:text="${cleanerName}">Cleaner Name</strong>
+            <span th:text="' · ' + ${cleanerEmail}"> · cleaner@example.com</span>
+            <span th:if="${submittedAt != null}" th:text="' · Submitted: ' + ${submittedAt}"> · Submitted: 2025-08-09 10:32</span>
+        </p>
+
+        <div class="call-to-action">
+            <a class="call-to-action-button"
+               th:href="${dashboardUrl}"
+               href="#"
+               title="Open admin dashboard to review">
+                Review Cleaner
+            </a>
+        </div>
+
+        <p class="content-paragraph">
+            If the button doesn’t work, copy and paste this URL into your browser:
+            <br />
+            <a class="footer-link" th:href="${dashboardUrl}" th:text="${dashboardUrl}">https://app.example.com/admin/cleaners/pending</a>
+        </p>
+
+        <p class="content-paragraph">
+            Thank you for keeping the platform high-quality.
+        </p>
+    </div>
+
+    <div class="footer-section">
+        <p class="footer-paragraph">This is an automated notification. Please do not reply.</p>
+        <p class="footer-paragraph">© <span th:text="${currentYear}">2025</span> Soba2Clean</p>
+    </div>
+</div>
+</body>
+</html>
