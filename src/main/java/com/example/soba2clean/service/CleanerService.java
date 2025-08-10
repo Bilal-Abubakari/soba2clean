@@ -19,12 +19,12 @@ import java.util.Map;
 
 @Service
 public class CleanerService {
-    @Value("${app.frontend-url}")
-    private String frontendUrl;
     private final CleanerRepository cleanerRepository;
     private final UserService userService;
     private final AdminService adminService;
     private final EmailService emailService;
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
 
     public CleanerService(CleanerRepository cleanerRepository, UserService userService, AdminService adminService, EmailService emailService) {
         this.cleanerRepository = cleanerRepository;
@@ -63,19 +63,52 @@ public class CleanerService {
     }
 
     public ApiResponse<Cleaner> approveCleaner(String id) {
+        Cleaner cleaner = setCleanerStatus(id, Status.ACTIVE);
+        this.sendApprovalNotification(cleaner);
+        return new ApiResponse<>("Cleaner approved successfully", cleaner);
+    }
+
+    public ApiResponse<Cleaner> rejectCleaner(String id, String reasonForRejection) {
+        Cleaner cleaner = setCleanerStatus(id, Status.SUSPENDED);
+        sendRejectionNotification(cleaner, reasonForRejection);
+        return new ApiResponse<>("Cleaner rejected successfully", cleaner);
+    }
+
+    private Cleaner setCleanerStatus(String id, Status status) {
         Cleaner cleaner = this.cleanerRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Cleaner with this ID does not exist"));
 
-        cleaner.setStatus(Status.ACTIVE);
-        Cleaner updatedCleaner = this.cleanerRepository.save(cleaner);
-        this.sendApprovalNotification(updatedCleaner);
-        return new ApiResponse<>("Cleaner approved successfully", updatedCleaner);
+        cleaner.setStatus(status);
+        return this.cleanerRepository.save(cleaner);
+    }
+
+    private void sendRejectionNotification(Cleaner cleaner, String reason) {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("cleanerName", cleaner.getUser().getFirstName());
+        variables.put("reason", reason);
+        variables.put("resubmitUrl", this.frontendUrl + "/cleaners/resubmit");
+        variables.put("supportEmail", "support@example.com");
+        variables.put("helpCenterUrl", "https://example.com/help");
+        variables.put("currentYear", String.valueOf(java.time.Year.now()));
+
+        try {
+            emailService.sendHtmlEmail(
+                    cleaner.getUser().getEmail(),
+                    "Application Status: Not Approved",
+                    EmailTemplateName.CLEANER_REJECTED,
+                    variables
+            );
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send rejection notification email", e);
+        }
+
+
     }
 
     private void sendApprovalNotification(Cleaner cleaner) {
         Map<String, Object> variables = new HashMap<>();
         variables.put("cleanerName", cleaner.getUser().getFirstName() + " " + cleaner.getUser().getLastName());
-        variables.put("profileUrl",  this.frontendUrl + "/cleaners/" + cleaner.getId());
+        variables.put("profileUrl", this.frontendUrl + "/cleaners/" + cleaner.getId());
         variables.put("supportEmail", "support@example.com");
         variables.put("currentYear", String.valueOf(java.time.Year.now()));
         try {
