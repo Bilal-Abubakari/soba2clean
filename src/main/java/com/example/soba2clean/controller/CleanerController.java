@@ -1,6 +1,7 @@
 package com.example.soba2clean.controller;
 
 import com.example.soba2clean.dto.cleaner.AddCleanerDto;
+import com.example.soba2clean.dto.cleaner.DeclineCleanerDto;
 import com.example.soba2clean.model.Cleaner;
 import com.example.soba2clean.response.ApiResponse;
 import com.example.soba2clean.service.CleanerService;
@@ -33,5 +34,11 @@ public class CleanerController {
     @GetMapping("/{id}/approve")
     public ApiResponse<Cleaner> approveCleaner(@PathVariable String id) {
         return this.cleanerService.approveCleaner(id);
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PostMapping("/{id}/decline")
+    public ApiResponse<Cleaner> declineCleaner(@PathVariable String id, @RequestBody DeclineCleanerDto declineCleanerDto) {
+        return this.cleanerService.declineCleaner(id, declineCleanerDto.getReason());
     }
 }

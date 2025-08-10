@@ -7,8 +7,8 @@ public enum EmailTemplateName {
     EMAIL_VERIFICATION("email_verification"),
     FORGOT_PASSWORD("forgot_password"),
     NEW_CLEANER("new_cleaner"),
-    CLEANER_APPROVED("cleaner_approved");
-
+    CLEANER_APPROVED("cleaner_approved"),
+    CLEANER_REJECTED("cleaner_rejected");
 
     private final String templateFileName;
 
