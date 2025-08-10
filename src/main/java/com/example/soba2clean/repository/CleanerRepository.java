@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface CleanerRepository extends JpaRepository<Cleaner, Long> {
+public interface CleanerRepository extends JpaRepository<Cleaner, String> {
     List<Cleaner> findByUser(User user);
 
     Cleaner findCleanerByUser(User user);

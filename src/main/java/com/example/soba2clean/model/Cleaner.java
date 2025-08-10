@@ -2,6 +2,7 @@ package com.example.soba2clean.model;
 
 import com.example.soba2clean.dto.cleaner.AddCleanerDto;
 import com.example.soba2clean.enums.Experience;
+import com.example.soba2clean.enums.Status;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
@@ -35,6 +36,9 @@ public class Cleaner extends AuditableEntity {
     private String longitude;
 
     private String latitude;
+
+    @Setter
+    private Status status = Status.PENDING;
 
     public void setCleaner(AddCleanerDto addCleanerDto) {
         this.licenseNumber = addCleanerDto.licenseNumber;
