@@ -34,26 +34,23 @@ public class CleanerService {
     }
 
     public ApiResponse<Cleaner> addCleaner(String email, AddCleanerDto addCleanerDto) {
-        User user = this.userService.findUserByEmail(email)
-                .orElseThrow(() -> new NotFoundException("User with this email does not exist"));
-        Cleaner existingCleaner = this.cleanerRepository.findCleanerByUser(user);
+        Cleaner existingCleaner = findCleanerByEmail(email);
         if (existingCleaner != null) {
             throw new NotFoundException("Cleaner already exists for user with email: " + email);
         }
         Cleaner cleaner = new Cleaner();
+        User user = this.userService.findUserByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User with this email does not exist"));
         cleaner.setUser(user);
         cleaner.setStatus(Status.PENDING);
         cleaner.setCleaner(addCleanerDto);
         Cleaner savedCleaner = this.cleanerRepository.save(cleaner);
-        this.adminService.notifyAdminsAboutNewCleaner(savedCleaner);
+        this.adminService.notifyAdminsAboutCleanerUpdate(savedCleaner, true);
         return new ApiResponse<>("Cleaner added successfully", savedCleaner);
     }
 
     public ApiResponse<Cleaner> getCleanerByEmail(String email) {
-        User user = this.userService.findUserByEmail(email)
-                .orElseThrow(() -> new NotFoundException("User with this email does not exist"));
-
-        Cleaner cleaner = this.cleanerRepository.findCleanerByUser(user);
+        Cleaner cleaner = findCleanerByEmail(email);
 
         if (cleaner == null) {
             throw new NotFoundException("Cleaner not found for user with email: " + email);
@@ -72,6 +69,21 @@ public class CleanerService {
         Cleaner cleaner = setCleanerStatus(id, Status.SUSPENDED);
         sendDeclinationNotification(cleaner, reasonForRejection);
         return new ApiResponse<>("Cleaner rejected successfully", cleaner);
+    }
+
+    public ApiResponse<Cleaner> updateCleaner(String email, AddCleanerDto addCleanerDto) {
+        Cleaner cleaner = findCleanerByEmail(email);
+        if (cleaner == null) {
+            throw new NotFoundException("Cleaner not found for user with email: " + email);
+        }
+        if (!cleaner.hasCleanerChanged(addCleanerDto)) {
+            return new ApiResponse<>("No changes detected in cleaner profile", cleaner);
+        }
+        cleaner.setCleaner(addCleanerDto);
+        cleaner.setStatus(Status.PENDING);
+        Cleaner updatedCleaner = this.cleanerRepository.save(cleaner);
+        this.adminService.notifyAdminsAboutCleanerUpdate(updatedCleaner, false);
+        return new ApiResponse<>("Cleaner updated successfully", updatedCleaner);
     }
 
     private Cleaner setCleanerStatus(String id, Status status) {
@@ -117,5 +129,11 @@ public class CleanerService {
         } catch (MessagingException e) {
             throw new RuntimeException("Failed to send approval notification email", e);
         }
+    }
+
+    private Cleaner findCleanerByEmail(String email) {
+        User user = this.userService.findUserByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User with this email does not exist"));
+        return this.cleanerRepository.findCleanerByUser(user);
     }
 }

@@ -100,7 +100,7 @@
 <body>
 <div class="email-container">
     <div class="header-section">
-        <div class="header-title">New Cleaner Submitted</div>
+        <div class="header-title" th:text="${title}">New Cleaner Submitted</div>
         <div class="header-subtitle">Action required: review and approve</div>
     </div>
 
@@ -108,7 +108,7 @@
         <p class="content-paragraph" th:text="'Hello ' + ${adminName} + ','">Hello Admin,</p>
 
         <p class="content-paragraph">
-            A new cleaner has been added and is awaiting your review. Please sign in to the dashboard to approve or reject this submission.
+            A new cleaner has been added or a cleaner has updated his/her profile and is awaiting your review. Please sign in to the dashboard to approve or reject this submission.
         </p>
 
         <p class="meta">
