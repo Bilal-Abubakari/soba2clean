@@ -29,6 +29,7 @@ public class AdminService {
         variables.put("cleanerEmail", cleaner.getUser().getEmail());
         variables.put("submittedAt", cleaner.getCreatedAt().toString());
         variables.put("dashboardUrl", this.frontendUrl + "/admin/cleaners/" + cleaner.getId() + "/approve");
+        variables.put("title", newCleaner ? "New Cleaner Submitted" : "Cleaner Profile Updated");
 
         this.userService.findAllAdmins().forEach(admin -> {
             try {
