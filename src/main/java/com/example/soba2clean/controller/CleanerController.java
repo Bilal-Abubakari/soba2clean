@@ -30,6 +30,12 @@ public class CleanerController {
         return this.cleanerService.getCleanerByEmail(authentication.getName());
     }
 
+    @PreAuthorize("hasAuthority('ROLE_CLEANER')")
+    @PutMapping("/me")
+    public ApiResponse<Cleaner> updateCleaner(@RequestBody AddCleanerDto addCleanerDto, Authentication authentication) {
+        return this.cleanerService.updateCleaner(authentication.getName(), addCleanerDto);
+    }
+
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping("/{id}/approve")
     public ApiResponse<Cleaner> approveCleaner(@PathVariable String id) {

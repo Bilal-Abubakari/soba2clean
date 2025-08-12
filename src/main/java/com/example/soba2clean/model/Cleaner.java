@@ -55,4 +55,17 @@ public class Cleaner extends AuditableEntity {
     public void incrementHires() {
         this.hires++;
     }
+
+    public boolean hasCleanerChanged(AddCleanerDto addCleanerDto) {
+        return !licenseNumber.equals(addCleanerDto.licenseNumber) ||
+                !experience.equals(addCleanerDto.experience) ||
+                !description.equals(addCleanerDto.description) ||
+                ratePerHour != addCleanerDto.ratePerHour ||
+                !city.equals(addCleanerDto.city) ||
+                !country.equals(addCleanerDto.country) ||
+                !town.equals(addCleanerDto.town) ||
+                !longitude.equals(addCleanerDto.longitude) ||
+                !latitude.equals(addCleanerDto.latitude);
+    }
+
 }

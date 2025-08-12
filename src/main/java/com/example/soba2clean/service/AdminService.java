@@ -13,17 +13,17 @@ import java.util.Map;
 
 @Service
 public class AdminService {
-    @Value("${app.frontend-url}")
-    private String frontendUrl;
     private final UserService userService;
     private final EmailService emailService;
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
 
     public AdminService(UserService userService, EmailService emailService) {
         this.userService = userService;
         this.emailService = emailService;
     }
 
-    public void notifyAdminsAboutNewCleaner(Cleaner cleaner) {
+    public void notifyAdminsAboutCleanerUpdate(Cleaner cleaner, Boolean newCleaner) {
         Map<String, Object> variables = new HashMap<>();
         variables.put("cleanerName", cleaner.getUser().getFirstName() + " " + cleaner.getUser().getLastName());
         variables.put("cleanerEmail", cleaner.getUser().getEmail());
@@ -33,8 +33,9 @@ public class AdminService {
         this.userService.findAllAdmins().forEach(admin -> {
             try {
                 variables.put("adminName", admin.getFirstName());
-                this.emailService.sendHtmlEmail(admin.getEmail(), "Action required: New cleaner awaiting approval",
-                    EmailTemplateName.NEW_CLEANER, variables);
+                this.emailService.sendHtmlEmail(admin.getEmail(),
+                        "Action required:" + (newCleaner ? "New cleaner awaiting approval" : "Cleaner profile updated, awaiting review"),
+                        EmailTemplateName.NEW_CLEANER, variables);
             } catch (MessagingException e) {
                 throw new RuntimeException(e);
             }
