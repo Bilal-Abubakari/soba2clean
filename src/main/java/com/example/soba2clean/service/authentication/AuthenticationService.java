@@ -73,14 +73,14 @@ public class AuthenticationService {
 
             checkIfEmailIsVerified(user);
 
-            if (!this.passwordHistoryService.checkIfPasswordIsCorrect(password, user.getPassword())) {
-                userService.incrementLoginAttemptCounts(user);
-                throw new UnauthorizedException("Invalid email or password");
-            }
-
             if (user.getLoginAttempts() >= MAX_LOGIN_ATTEMPTS) {
                 this.verificationService.sentUnlockAccountEmail(user);
                 throw new UnauthorizedException("Account locked due to too many failed login attempts, please check your email for unlocking account link");
+            }
+
+            if (!this.passwordHistoryService.checkIfPasswordIsCorrect(password, user.getPassword())) {
+                userService.incrementLoginAttemptCounts(user);
+                throw new UnauthorizedException("Invalid email or password");
             }
 
             String accessToken = jwtService.generateAccessToken(user);
