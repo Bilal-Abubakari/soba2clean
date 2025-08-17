@@ -27,4 +27,20 @@ public class UserService {
     public List<User> findAllAdmins() {
         return this.userRepository.findAllByRole(Role.ADMIN);
     }
+
+    public void incrementLoginAttemptCounts(User user) {
+        user.incrementLoginAttempts();
+        this.userRepository.save(user);
+    }
+
+    public User verifyUser(User user) {
+        user.markAsVerified();
+        return userRepository.save(user);
+    }
+
+    public User resetLoginAttempts(User user) {
+        user.setLoginAttempts(0);
+        return userRepository.save(user);
+    }
+
 }

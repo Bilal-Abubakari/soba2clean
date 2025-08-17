@@ -21,4 +21,9 @@ public class VerificationController {
     public ApiResponse<User> verifyEmail(@PathVariable String token) {
         return verificationService.verifyEmail(token);
     }
+
+    @GetMapping("unlock/{token}")
+    public ApiResponse<User> unlockAccount(@PathVariable String token) {
+        return verificationService.unlockAccount(token);
+    }
 }

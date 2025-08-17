@@ -19,40 +19,39 @@ import java.util.List;
 @Table(name = "sobaUser")
 public class User extends AuditableEntity implements UserDetails {
     @Getter
+    @Setter
+    int loginAttempts = 0;
+    @Getter
     private String firstName;
-
     @Getter
     private String lastName;
-
     @Getter
     private String email;
-
     @Setter
     @Getter
     @JsonIgnore
     private String password;
-
     @Getter
     private String phoneNumber;
-
     @Getter
     private String address;
-
     @Setter
     @Getter
     private boolean mustChangePassword = false;
-
     @Enumerated(EnumType.STRING)
     @Getter
     private Role role;
-
     @Getter
+    @Setter
     private Instant verifiedAt;
-
     @Getter
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PasswordHistory> passwordHistory = new ArrayList<>();
+
+    public void incrementLoginAttempts() {
+        loginAttempts++;
+    }
 
     public void setUser(RegisterDto registerDto, Role role) {
         firstName = registerDto.getFirstName();

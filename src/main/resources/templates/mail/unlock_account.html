@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unlock Your Account — Soba2Clean</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .email-container {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            max-width: 48rem;
+            width: 100%;
+            margin: 1rem;
+        }
+
+        .header-section {
+            background: linear-gradient(to right, #2563eb, #4f46e5);
+            padding: 1.5rem;
+            text-align: center;
+            color: #ffffff;
+        }
+        .header-title {
+            font-size: 2.25rem;
+            line-height: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .header-subtitle {
+            font-size: 1.125rem;
+            line-height: 1.75rem;
+            opacity: 0.9;
+        }
+
+        .content-section {
+            padding: 1.5rem;
+        }
+        .content-paragraph {
+            color: #374151;
+            font-size: 1rem;
+            line-height: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .call-to-action {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .call-to-action-button {
+            display: inline-block;
+            background-color: #22c55e;
+            color: #ffffff;
+            font-weight: 700;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            text-decoration: none;
+            transition: all 0.3s ease-in-out;
+        }
+        .call-to-action-button:hover {
+            background-color: #16a34a;
+            transform: scale(1.05);
+        }
+
+        .footer-section {
+            background-color: #e5e7eb;
+            padding: 1.5rem;
+            text-align: center;
+            color: #4b5563;
+            font-size: 0.875rem;
+        }
+        .footer-paragraph {
+            margin-bottom: 0.5rem;
+        }
+        .footer-link {
+            color: #2563eb;
+            text-decoration: underline;
+            margin: 0 0.5rem;
+        }
+        .social-link {
+            color: #3b82f6;
+            margin: 0 0.5rem;
+        }
+        .social-link:hover {
+            color: #1d4ed8;
+        }
+
+        @media (min-width: 640px) {
+            .email-container {
+                margin: 1.5rem;
+            }
+            .header-section {
+                padding: 2rem;
+            }
+            .header-title {
+                font-size: 2.5rem;
+            }
+            .header-subtitle {
+                font-size: 1.25rem;
+            }
+            .content-section {
+                padding: 2rem;
+            }
+            .content-paragraph {
+                font-size: 1.125rem;
+            }
+            .footer-section {
+                padding: 2rem;
+            }
+        }
+        @media (min-width: 1024px) {
+            .email-container {
+                margin: 2rem;
+            }
+            .content-section {
+                padding: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body style="font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; background-color: #f3f4f6; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+<div class="email-container" style="background-color: #ffffff; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); overflow: hidden; max-width: 48rem; width: 100%; margin: 1rem;">
+    <div class="header-section" style="background: linear-gradient(to right, #2563eb, #4f46e5); padding: 1.5rem; text-align: center; color: #ffffff;">
+        <h1 class="header-title" style="font-size: 2.25rem; line-height: 2.5rem; font-weight: 700; margin-bottom: 0.5rem;">Account Locked</h1>
+        <p class="header-subtitle" style="font-size: 1.125rem; line-height: 1.75rem; opacity: 0.9;">Your account has been locked due to multiple failed login attempts.</p>
+    </div>
+    <div class="content-section" style="padding: 1.5rem;">
+        <p class="content-paragraph" style="color: #374151; font-size: 1rem; line-height: 1.5rem; margin-bottom: 1.5rem;">
+            Dear <span th:text="${firstName}"></span>,
+        </p>
+        <p class="content-paragraph" style="color: #374151; font-size: 1rem; line-height: 1.5rem; margin-bottom: 1.5rem;">
+            We've detected several unsuccessful login attempts on your account. For your security, we have temporarily locked your account. To unlock it, please click the button below.
+        </p>
+        <div class="call-to-action" style="text-align: center; margin-bottom: 2rem;">
+            <a th:href="@{${unlockLink}}"
+               class="call-to-action-button"
+               style="display: inline-block; background-color: #22c55e; color: #ffffff; font-weight: 700; padding: 0.75rem 1.5rem; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); text-decoration: none;">
+                Unlock Your Account
+            </a>
+        </div>
+
+        <p class="content-paragraph" style="color: #374151; font-size: 1rem; line-height: 1.5rem; margin-bottom: 1.5rem;">
+            If you have any questions, feel free to visit our <a href="https://your-service.com/faq" style="color: #2563eb; text-decoration: underline;">FAQ page</a> or contact our support team at <a href="mailto:support@soba2clean.com" style="color: #2563eb; text-decoration: underline;">support@soba2clean.com</a>.
+        </p>
+
+        <p class="content-paragraph" style="color: #374151; font-size: 1rem; line-height: 1.5rem;">
+            Best regards,<br>
+            The Soba2Clean Team
+        </p>
+    </div>
+
+    <!-- Footer Section -->
+    <div class="footer-section" style="background-color: #e5e7eb; padding: 1.5rem; text-align: center; color: #4b5563; font-size: 0.875rem;">
+        <p class="footer-paragraph" style="margin-bottom: 0.5rem;">&copy; 2025 Soba2Clean. All rights reserved.</p>
+        <p>
+            <a href="https://your-service.com/privacy" class="footer-link" style="color: #2563eb; text-decoration: underline; margin: 0 0.5rem;">Privacy Policy</a> |
+            <a href="https://your-service.com/terms" class="footer-link" style="color: #2563eb; text-decoration: underline; margin: 0 0.5rem;">Terms of Service</a>
+        </p>
+        <p style="margin-top: 1rem;">
+            <a href="https://twitter.com/your_service" class="social-link" style="color: #3b82f6; margin: 0 0.5rem;">Twitter</a>
+            <a href="https://facebook.com/your_service" class="social-link" style="color: #3b82f6; margin: 0 0.5rem;">Facebook</a>
+            <a href="https://linkedin.com/company/your_service" class="social-link" style="color: #3b82f6; margin: 0 0.5rem;">LinkedIn</a>
+        </p>
+    </div>
+</div>
+</body>
+</html>
+
